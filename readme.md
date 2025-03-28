@@ -5,3 +5,6 @@ Turtle justice is an AI based solution for slow and improper justice system of N
 
 ## Architecture of Turtle justice 
 ![screenshot](./turtle-secondary-backend/architecture.png)
+
+## Setting up locally 
+Look into individual folder's readme.md to set the project locally 
