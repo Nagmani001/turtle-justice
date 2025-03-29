@@ -1,29 +1,65 @@
 import express, { Request, Response } from "express";
+import { GoogleGenAI } from "@google/genai";
 import cors from "cors";
 import { PrismaClient } from "@prisma/client";
 import { autherize } from "./middleware";
+import { generateQuer } from "./utils";
 
 const app = express();
 const client = new PrismaClient();
+const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
 
 app.use(express.json());
 app.use(cors());
 
-app.post("/project", autherize, async (req: Request, res: Response) => {
+app.post("/createProject", autherize, async (req: Request, res: Response) => {
   const { prompt } = req.body;
   const userId = req.userId;
-  const description = prompt.split("/n")[0];
-  console.log("hi bro")
   if (!userId) return;
-  const project = await client.project.create({
+  if (prompt) {
+    const description = prompt.split(" ")[1];
+    const project = await client.project.create({
+      data: {
+        description,
+        userId
+      }
+    });
+    res.json({
+      projectId: project.id
+    });
+
+  } else {
+    const project = await client.project.create({
+      data: {
+        userId: userId
+      }
+    });
+    res.json({
+      projectId: project.id
+    });
+  }
+});
+
+app.post("/generateUsefulName/:projectId", async (req: Request, res: Response) => {
+  const projectId = req.params["projectId"];
+  const userQuery = req.body.query;
+  const query = generateQuer(userQuery);
+  const response: any = await ai.models.generateContent({
+    model: "gemini-2.0-flash",
+    contents: query
+  });
+  console.log(response.candidates[0].content?.parts[0].text);
+  await client.project.update({
+    where: {
+      id: projectId
+    },
     data: {
-      description,
-      userId
+      description: response.candidates[0].content?.parts[0].text
     }
   });
   res.json({
-    projectId: project.id
-  });
+    msg: "done"
+  })
 });
 
 app.get("/projects", autherize, async (req: Request, res: Response) => {
@@ -36,7 +72,7 @@ app.get("/projects", autherize, async (req: Request, res: Response) => {
   res.json(project)
 });
 
-app.post("/prompt/:projectId", async (req: Request, res: Response) => {
+app.post("/user/:projectId", async (req: Request, res: Response) => {
   const projectId = req.params["projectId"];
   const userPrompt = req.body.prompt;
   console.log(projectId);
@@ -46,6 +82,22 @@ app.post("/prompt/:projectId", async (req: Request, res: Response) => {
       content: userPrompt,
       projectId,
       type: "USER"
+    }
+  });
+  res.json({
+    prompt
+  })
+});
+app.post("/system/:projectId", async (req: Request, res: Response) => {
+  const projectId = req.params["projectId"];
+  const userPrompt = req.body.prompt;
+  console.log(projectId);
+  console.log(userPrompt);
+  const prompt = await client.prompt.create({
+    data: {
+      content: userPrompt,
+      projectId,
+      type: "SYSTEM"
     }
   });
   res.json({

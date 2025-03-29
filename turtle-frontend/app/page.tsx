@@ -1,4 +1,3 @@
-"use client";
 import Footer from "./components/Footer";
 import HeroSection from "./components/Hero";
 import NavBar from "./components/Nav";

@@ -5,6 +5,8 @@ import jwt from "jsonwebtoken";
 export function autherize(req: Request, res: Response, next: NextFunction) {
   try {
     const token = req.header("Authorization");
+    console.log("hi bro ")
+    console.log(token);
     const actualToken = token?.split(" ")[1];
     if (!token || !actualToken) return;
     const decoded = jwt.verify(actualToken, JWT_SECRET, {
@@ -14,7 +16,6 @@ export function autherize(req: Request, res: Response, next: NextFunction) {
       res.json({ msg: "unauthorized" });
       return;
     }
-    console.log(decoded)
     const userId = (decoded as any).sub
     if (!userId) {
       res.json({ "msg": "unauthorized" });

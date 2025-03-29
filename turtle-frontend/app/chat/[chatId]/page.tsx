@@ -1,17 +1,12 @@
-import { useEffect } from "react";
+import ChatClient from "./ChatClient";
 
-export default function({ params }: {
+export default async function({ params }: {
   params: {
-    projectId: string
+    chatId: string
   }
 }) {
-  const projectId = params.projectId;
-
-  useEffect(() => {
-
-  }, [])
+  const projectId = await params.chatId;
   return <div>
-
+    <ChatClient params={{ chatId: projectId }} />
   </div>
-
 }

@@ -9,6 +9,8 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 function autherize(req, res, next) {
     try {
         const token = req.header("Authorization");
+        console.log("hi bro ");
+        console.log(token);
         const actualToken = token === null || token === void 0 ? void 0 : token.split(" ")[1];
         if (!token || !actualToken)
             return;
@@ -19,7 +21,6 @@ function autherize(req, res, next) {
             res.json({ msg: "unauthorized" });
             return;
         }
-        console.log(decoded);
         const userId = decoded.sub;
         if (!userId) {
             res.json({ "msg": "unauthorized" });
