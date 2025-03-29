@@ -42,6 +42,9 @@ pip3.11 install --timeout 1800 -r requirements.txt
 ```
 cp .env.example .env
 ```
+
+- add pdf_path in /app/utils.py
+
 - populate chromaDB
 ```
 python3.11 -m app.ingest
